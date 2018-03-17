@@ -30,6 +30,8 @@ Currently, the following functions are working:
 * "Tivo channel down"
 * "Tivo pause"
 * "Tivo play"
+* "Tivo off"
+* "Tivo on"
 
 Mycroft will respond with, e.g.:
 * "Bob's Tivo is currently watching channel 231"
