@@ -24,7 +24,9 @@ Add the following to your mycroft.conf and restart mycroft-skills
 
 Port should always be 31339.  Zap2iT is optional but will allow mycroft to tell you what is playing on the current channel.  Without it, it will only tell you the channel.
 
-##Currently, only the following functions work:
+## Currently, only the following functions work:
 * "Tivo status"
 * "Tivo channel up"
 * "Tivo channel down"
+
+Mycroft will respond with, e.g., "Bob's Tivo is currently watching channel 231 Raider's of the Lost Ark."
