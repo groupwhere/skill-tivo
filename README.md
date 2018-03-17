@@ -10,7 +10,21 @@ https://community.home-assistant.io/t/tivo-media-player-component/851
 https://charliemeyer.net/2012/12/04/remote-control-of-a-tivo-from-the-linux-command-line/
 ```
 
-## Examples / Working functions
+Add the following to your mycroft.conf and restart mycroft-skills
+```
+  "TivoSkill": {
+    "name": "Name for your deivce",
+    "host": "192.168.0.84",
+    "port": 31339,
+    "zapuser": "your@email.addr",
+    "zappass": "YOURZAP2ITPASS",
+    "debug": false
+  }
+```
+
+Port should always be 31339.  Zap2iT is optional but will allow mycroft to tell you what is playing on the current channel.  Without it, it will only tell you the channel.
+
+##Currently, only the following functions work:
 * "Tivo status"
 * "Tivo channel up"
 * "Tivo channel down"
