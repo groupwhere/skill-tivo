@@ -31,4 +31,4 @@ Currently, the following functions are working:
 
 Mycroft will respond with, e.g.:
 * "Bob's Tivo is currently watching channel 231"
-* "Bob's Tivo is currently watching channel 231 Raider's of the Lost Ark" (with your zap2it account setup and with the correct lineup selected with their service)
+* "Bob's Tivo is currently watching channel 231 Raiders of the Lost Ark" (with your zap2it account setup and with the correct lineup selected with their service)
