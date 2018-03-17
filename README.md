@@ -13,7 +13,7 @@ https://charliemeyer.net/2012/12/04/remote-control-of-a-tivo-from-the-linux-comm
 Add the following to your mycroft.conf and restart mycroft-skills
 ```
   "TivoSkill": {
-    "name": "Name for your deivce",
+    "name": "Bob's Tivo",
     "host": "192.168.0.84",
     "port": 31339,
     "zapuser": "your@email.addr",
