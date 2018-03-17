@@ -29,4 +29,6 @@ Port should always be 31339.  Zap2iT is optional but will allow mycroft to tell 
 * "Tivo channel up"
 * "Tivo channel down"
 
-Mycroft will respond with, e.g., "Bob's Tivo is currently watching channel 231 Raider's of the Lost Ark."
+Mycroft will respond with, e.g.:
+* "Bob's Tivo is currently watching channel 231"
+* "Bob's Tivo is currently watching channel 231 Raider's of the Lost Ark" (with your zap2it account setup and with the correct lineup selected with their service)
