@@ -106,12 +106,15 @@ class TivoDevice(object):
         data = ""
         if extra:
             code = code + " " + extra
-            # can be IRCODE, KEYBOARD, or TELEPORT.  Usually it's IRCODE but we might switch to KEYBOARD since it can do more.
+            # can be '', IRCODE, KEYBOARD, or TELEPORT.  Usually it's IRCODE but we might switch to KEYBOARD since it can do more.
 
         try:
             self.connect(self._host, self._port)
             if code:
-                tosend = cmdtype + " " + code + "\r"
+                if cmdtype == '':
+                    tosend = code + "\r"
+                else:
+                    tosend = cmdtype + " " + code + "\r"
             else:
                 tosend = ""
 
@@ -155,7 +158,6 @@ class TivoDevice(object):
         # Haven't determined a way to see if the content is paused
         return STATE_PLAYING
 
-    @property
     def show_live(self):
         data = ""
         """Live TV. """
@@ -193,8 +195,9 @@ class TivoDevice(object):
     def channel_set(self, channel):
         """Channel set."""
         data = self.show_live()
-        if(data == "LIVETV READY"):
-            self.send_code('SETCH', 'IRCODE', channel)
+        _LOGGER.debug("LIVE TV STATUS = '%s'", data)
+        #if(str(data).strip() == "LIVETV_READY"):
+        self.send_code('SETCH', '', channel)
 
     def media_ch_up(self):
         """Channel up."""
@@ -271,37 +274,6 @@ class TivoDevice(object):
             self._current['status'], self._current['channel'])
 
     @property
-    def turn_on(self):
-        """Turn on the receiver. """
-        if self._is_standby:
-            self.send_code('STANDBY','IRCODE')
-            self._is_standby = False
-
-    @property
-    def turn_off(self):
-        """Turn off the receiver. """
-        if self._is_standby == False:
-            self.send_code('STANDBY','IRCODE')
-            self.send_code('STANDBY','IRCODE')
-            self._is_standby = True
-
-    @property
-    def media_play(self):
-        """Send play command."""
-        if self._is_standby:
-            return
-
-        self.send_code('PLAY')
-
-    @property
-    def media_pause(self):
-        """Send pause command."""
-        if self._is_standby:
-            return None
-
-        self.send_code('PAUSE', 'IRCODE', 0, 0)
-
-    @property
     def media_stop(self):
         """Send stop command. """
         if self._is_standby:
@@ -321,6 +293,33 @@ class TivoDevice(object):
              return
 
         self.send_code('RECORD', 'IRCODE')
+
+    def turn_on(self):
+        """Turn on the receiver. """
+        if self._is_standby:
+            self.send_code('STANDBY','IRCODE')
+            self._is_standby = False
+
+    def turn_off(self):
+        """Turn off the receiver. """
+        if self._is_standby == False:
+            self.send_code('STANDBY','IRCODE')
+            self.send_code('STANDBY','IRCODE')
+            self._is_standby = True
+
+    def media_play(self):
+        """Send play command."""
+        if self._is_standby:
+            return
+
+        self.send_code('PLAY', 'IRCODE', 0, 0)
+
+    def media_pause(self):
+        """Send pause command."""
+        if self._is_standby:
+            return None
+
+        self.send_code('PAUSE', 'IRCODE', 0, 0)
 
     def media_previous_track(self):
         """Send rewind command."""
@@ -473,11 +472,7 @@ class TivoDevice(object):
 
         return zparams
 
-# Each skill is contained within its own class, which inherits base methods
-# from the MycroftSkill class.  You extend this class as shown below.
-
 class TivoSkill(MycroftSkill):
-    # The constructor of the skill, which calls MycroftSkill's constructor
     def __init__(self):
         super(TivoSkill, self).__init__(name="TivoSkill")
         
@@ -501,17 +496,6 @@ class TivoSkill(MycroftSkill):
         else:
             self.tivo = None
 
-    # The "handle_xxxx_intent" function is triggered by Mycroft when the
-    # skill's intent is matched.  The intent is defined by the IntentBuilder()
-    # pieces, and is triggered when the user's utterance matches the pattern
-    # defined by the keywords.  In this case, the match occurs when one word
-    # is found from each of the files:
-    #    vocab/en-us/Hello.voc
-    #    vocab/en-us/World.voc
-    # In this example that means it would match on utterances like:
-    #   'Hello world'
-    #   'Howdy you great big world'
-    #   'Greetings planet earth'
     @intent_handler(IntentBuilder("").require("Tivo").require("Status"))
     def handle_tivo_status_intent(self, message):
         statuswords = None
@@ -522,15 +506,45 @@ class TivoSkill(MycroftSkill):
 
         self.speak_dialog("tivo.status", data={"dev_name": self.tivo._name, "status": statuswords})
 
+    @intent_handler(IntentBuilder("").require("Tivo").require("Play"))
+    def handle_tivo_play_intent(self, message):
+        statuswords = None
+        self.tivo.media_play()
+        self.speak_dialog("tivo.playpause", data={"dev_name": self.tivo._name, "status": "playing"})
+
+    @intent_handler(IntentBuilder("").require("Tivo").require("Pause"))
+    def handle_tivo_pause_intent(self, message):
+        statuswords = None
+        self.tivo.media_pause()
+        self.speak_dialog("tivo.playpause", data={"dev_name": self.tivo._name, "status": "paused"})
+
+    @intent_handler(IntentBuilder("").require("Tivo").require("OnOff"))
+    def handle_power_intent(self, message):
+        if message.data["OnOff"] == "off":
+            self.tivo.turn_off()
+        else:  # assume "on"
+            self.tivo.turn_on()
+
+        self.speak_dialog("tivo.playpause", data={"dev_name": self.tivo._name, "status": message.data["OnOff"]})
+
     @intent_handler(IntentBuilder("").require("Tivo").require("Channel").require("Dir"))
     def handle_channel_intent(self, message):
+        updown = False
         if message.data["Dir"] == "up":
+            updown = True
             self.tivo.media_next_track()
-        else:  # assume "down"
+        elif message.data["Dir"] == "down":
+            updown = True
             self.tivo.media_previous_track()
+        else:
+            channel = message.utterance_remainder()
+            # Join 6 1 2 into 612
+            channel = channel.replace(" ", "")
+            # Pad to the left with zeroes (612 becomes 0612)
+            channel = channel.zfill(4)
+            _LOGGER.debug("CHANNEL SET COMMAND %s", channel)
 
-        statuswords = None
-        self.tivo.get_status()
+            self.tivo.channel_set(channel)
 
         if self.tivo._current["mode"] == "TV":
             #statuswords = "watching channel " + self.tivo._current["channel"].lstrip("0")
@@ -539,16 +553,6 @@ class TivoSkill(MycroftSkill):
         self.speak_dialog("tivo.status", data={"dev_name": self.tivo._name, "status": statuswords})
         #self.speak_dialog("count.is.now", data={"count": self.count})
 
-    # The "stop" method defines what Mycroft does when told to stop during
-    # the skill's execution. In this case, since the skill's functionality
-    # is extremely simple, there is no need to override it.  If you DO
-    # need to implement stop, you should return True to indicate you handled
-    # it.
-    #
-    # def stop(self):
-    #    return False
 
-# The "create_skill()" method is used to create an instance of the skill.
-# Note that it's outside the class itself.
 def create_skill():
     return TivoSkill()
