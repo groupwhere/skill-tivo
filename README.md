@@ -28,6 +28,7 @@ Currently, the following functions are working:
 * "Tivo status"
 * "Tivo channel up"
 * "Tivo channel down"
+* "Tivo channel set 2 3 1"
 * "Tivo pause"
 * "Tivo play"
 * "Tivo off"
