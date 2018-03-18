@@ -34,6 +34,10 @@ Currently, the following functions are working:
 * "Tivo off"
 * "Tivo on"
 
+These functions should be working but require some additional testing.  These are specifically to initiate and stop a recording in progress:
+* "Tivo record"
+* "Tivo stop"
+
 Mycroft will respond with, e.g.:
 * "Bob's Tivo is currently watching channel 231"
 * "Bob's Tivo is currently watching channel 231 Raiders of the Lost Ark" (with your zap2it account setup and with the correct lineup selected with their service)
