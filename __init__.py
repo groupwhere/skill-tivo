@@ -518,6 +518,17 @@ class TivoSkill(MycroftSkill):
         self.tivo.media_pause()
         self.speak_dialog("tivo.playpause", data={"dev_name": self.tivo._name, "status": "paused"})
 
+    # Record or Stop
+    @intent_handler(IntentBuilder("").require("Tivo").require("Record"))
+    def handle_tivo_play_intent(self, message):
+        if message.data["Record"] == "record":
+            self.tivo.media_record()
+            self.speak_dialog("tivo.status", data={"dev_name": self.tivo._name, "status": "recording"})
+        else: # assume stop
+            self.tivo.media_stop()
+            self.speak_dialog("tivo.status", data={"dev_name": self.tivo._name + " recording", "status": "stopped"})
+
+    # On or off
     @intent_handler(IntentBuilder("").require("Tivo").require("OnOff"))
     def handle_power_intent(self, message):
         if message.data["OnOff"] == "off":
@@ -527,6 +538,7 @@ class TivoSkill(MycroftSkill):
 
         self.speak_dialog("tivo.playpause", data={"dev_name": self.tivo._name, "status": message.data["OnOff"]})
 
+    # Channel up, down, or set to number
     @intent_handler(IntentBuilder("").require("Tivo").require("Channel").require("Dir"))
     def handle_channel_intent(self, message):
         updown = False
@@ -542,17 +554,14 @@ class TivoSkill(MycroftSkill):
             channel = channel.replace(" ", "")
             # Pad to the left with zeroes (612 becomes 0612)
             channel = channel.zfill(4)
-            _LOGGER.debug("CHANNEL SET COMMAND %s", channel)
+            #_LOGGER.debug("CHANNEL SET COMMAND %s", channel)
 
             self.tivo.channel_set(channel)
 
         if self.tivo._current["mode"] == "TV":
-            #statuswords = "watching channel " + self.tivo._current["channel"].lstrip("0")
             statuswords = "watching " + self.tivo._current["title"]
 
         self.speak_dialog("tivo.status", data={"dev_name": self.tivo._name, "status": statuswords})
-        #self.speak_dialog("count.is.now", data={"count": self.count})
-
 
 def create_skill():
     return TivoSkill()
