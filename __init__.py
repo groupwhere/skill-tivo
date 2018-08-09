@@ -11,6 +11,7 @@ import json
 import requests
 import re
 import urllib
+import urllib.parse
 
 __author__ = 'groupwhere'
 _LOGGER = getLogger(__name__)
@@ -384,7 +385,11 @@ class TivoDevice(object):
         host = 'https://tvlistings.zap2it.com/'
 
         # Only get 1 hour of programming since we only need/want the current program titles
-        param = '?time=' + str(now) + '&timespan=1&pref=-&' + urllib.urlencode(zap_params) + '&TMSID=&FromPage=TV%20Grid&ActivityID=1&OVDID=&isOverride=true'
+        try:
+            param = '?time=' + str(now) + '&timespan=1&pref=-&' + urllib.parse.urlencode(zap_params) + '&TMSID=&FromPage=TV%20Grid&ActivityID=1&OVDID=&isOverride=true'
+        except:
+            param = '?time=' + str(now) + '&timespan=1&pref=-&' + urllib.urlencode(zap_params) + '&TMSID=&FromPage=TV%20Grid&ActivityID=1&OVDID=&isOverride=true'
+
         url = host + 'api/grid' + param
         if self.debug:
             _LOGGER.warning("Zapget url: %s", url)
